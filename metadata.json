@@ -1,0 +1,6 @@
+{
+  "name": "Golden Women's Clothing Store",
+  "description": "Quiet luxury women's fashion boutique atelier offering curated dresses, co-ords, and outerwear with instant WhatsApp & Telegram ordering.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
