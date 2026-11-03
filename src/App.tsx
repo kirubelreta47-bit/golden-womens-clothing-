@@ -3,38 +3,80 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PRODUCTS } from './data/products';
-import { Product, CartItem, CategoryType, Currency, ProductColor } from './types/store';
+import { Product, CartItem, CategoryType, ProductColor } from './types/store';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
-import { CategoryFilter } from './components/CategoryFilter';
+import { CategoryNavSection } from './components/CategoryNavSection';
 import { ProductCard } from './components/ProductCard';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { CartDrawer } from './components/CartDrawer';
 import { WishlistDrawer } from './components/WishlistDrawer';
 import { SizeGuideModal } from './components/SizeGuideModal';
 import { TrustSection } from './components/TrustSection';
+import { ShopWithConfidenceBanner } from './components/ShopWithConfidenceBanner';
+import { LocationsSection } from './components/LocationsSection';
 import { InstagramGrid } from './components/InstagramGrid';
 import { Footer } from './components/Footer';
-import { Sparkles, MessageCircle, Send } from 'lucide-react';
-import { STORE_CONTACTS } from './utils/orderLinks';
+import { FloatingActions } from './components/FloatingActions';
+import { ArrowRight, Sparkles } from 'lucide-react';
+
+const CART_STORAGE_KEY = 'golden_womens_clothing_cart_v1';
+const WISHLIST_STORAGE_KEY = 'golden_womens_clothing_wishlist_v1';
 
 export default function App() {
   // Store Global State
   const [activeCategory, setActiveCategory] = useState<CategoryType>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [sortBy, setSortBy] = useState<string>('featured');
 
   // Modals & Drawers
   const [cartOpen, setCartOpen] = useState<boolean>(false);
+  const [cartCheckoutMode, setCartCheckoutMode] = useState<boolean>(false);
   const [wishlistOpen, setWishlistOpen] = useState<boolean>(false);
   const [sizeGuideOpen, setSizeGuideOpen] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Cart & Wishlist Storage
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [wishlist, setWishlist] = useState<Product[]>([]);
+  // Cart & Wishlist Storage backed by localStorage
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const saved = localStorage.getItem(CART_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error('Failed to parse cart from localStorage', e);
+      return [];
+    }
+  });
+
+  const [wishlist, setWishlist] = useState<Product[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const saved = localStorage.getItem(WISHLIST_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error('Failed to parse wishlist from localStorage', e);
+      return [];
+    }
+  });
+
+  // Sync cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch (e) {
+      console.error('Failed to save cart to localStorage', e);
+    }
+  }, [cart]);
+
+  // Sync wishlist to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist));
+    } catch (e) {
+      console.error('Failed to save wishlist to localStorage', e);
+    }
+  }, [wishlist]);
 
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -79,6 +121,18 @@ export default function App() {
     showToast(`Added "${product.name}" (${chosenSize}) to your bag`);
   };
 
+  // Direct checkout action (adds to cart and opens checkout directly)
+  const handleDirectCheckout = (
+    product: Product,
+    size: string,
+    color: ProductColor,
+    quantity: number = 1
+  ) => {
+    handleAddToCart(product, size, color, quantity);
+    setCartCheckoutMode(true);
+    setCartOpen(true);
+  };
+
   const handleUpdateQuantity = (cartItemId: string, newQty: number) => {
     if (newQty <= 0) {
       handleRemoveFromCart(cartItemId);
@@ -95,6 +149,11 @@ export default function App() {
 
   const handleClearCart = () => {
     setCart([]);
+    try {
+      localStorage.removeItem(CART_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
   };
 
   // Wishlist actions
@@ -143,40 +202,30 @@ export default function App() {
       );
     }
 
-    // Sorting
-    switch (sortBy) {
-      case 'price-asc':
-        result.sort((a, b) => a.priceETB - b.priceETB);
-        break;
-      case 'price-desc':
-        result.sort((a, b) => b.priceETB - a.priceETB);
-        break;
-      case 'name':
-        result.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      default:
-        // 'featured'
-        break;
-    }
-
     return result;
-  }, [activeCategory, searchQuery, sortBy]);
+  }, [activeCategory, searchQuery]);
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-[#FBF9F5] text-[#1C1917] flex flex-col font-sans selection:bg-[#C5A880]/20 selection:text-[#1C1917]">
-      
-      {/* 1. Minimalist Header with Brand Logo */}
+    <div className="min-h-screen bg-[#FAF7F2] text-[#171513] flex flex-col font-sans selection:bg-[#C69A4A]/20 selection:text-[#171513]">
+
+      {/* MAIN NAVIGATION HEADER */}
       <Header
         cartCount={totalCartCount}
-        onOpenCart={() => setCartOpen(true)}
+        wishlistCount={wishlist.length}
+        onOpenCart={() => {
+          setCartCheckoutMode(false);
+          setCartOpen(true);
+        }}
+        onOpenWishlist={() => setWishlistOpen(true)}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
         onSelectCategory={(cat) => setActiveCategory(cat as CategoryType)}
         activeCategory={activeCategory}
-        onOpenSizeGuide={() => setSizeGuideOpen(true)}
       />
 
-      {/* 2. Hero Editorial Section (Full-bleed luxury background design on mobile) */}
+      {/* 3. HERO EDITORIAL BANNER matching reference */}
       <Hero
         onExploreClick={() => {
           const el = document.getElementById('catalog-section');
@@ -184,24 +233,50 @@ export default function App() {
         }}
       />
 
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 w-full pb-20">
-        
-        {/* 3. Category Tabs, Search, and Catalog Sort Bar */}
-        <CategoryFilter
-          activeCategory={activeCategory}
-          onSelectCategory={(cat) => setActiveCategory(cat)}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          totalFilteredCount={filteredProducts.length}
-          searchQuery={searchQuery}
-          onClearSearch={() => setSearchQuery('')}
-        />
+      {/* 4. CATEGORY NAVIGATION SHELF & PROMO CARD matching reference */}
+      <CategoryNavSection
+        activeCategory={activeCategory}
+        onSelectCategory={setActiveCategory}
+      />
 
-        {/* 4. Product Collection: Horizontal Sliding on Mobile, Grid on Tablet/Desktop */}
+      {/* 5. LATEST ARRIVALS COLLECTION matching reference */}
+      <main id="catalog-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 w-full py-10 sm:py-14 scroll-mt-20">
+
+        {/* Centered Collection Header with Accent Lines & View All Button matching reference */}
+        <div className="flex flex-col md:flex-row items-center justify-between mb-8 sm:mb-12 gap-4">
+          {/* Desktop Left Spacer to balance View All button */}
+          <div className="hidden md:block w-36" />
+
+          {/* Centered Heading with thin gold lines */}
+          <div className="text-center space-y-1">
+            <div className="flex items-center justify-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C69A4A] font-semibold">
+              <span className="w-8 sm:w-12 h-[1px] bg-[#C69A4A]" />
+              <span>Our Collection</span>
+              <span className="w-8 sm:w-12 h-[1px] bg-[#C69A4A]" />
+            </div>
+
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-[#171513] tracking-tight">
+              Latest Arrivals
+            </h2>
+          </div>
+
+          {/* Right: View All Products Button matching reference */}
+          <button
+            onClick={() => {
+              setActiveCategory('all');
+              setSearchQuery('');
+            }}
+            className="px-5 py-2.5 bg-[#171513] hover:bg-[#2b2724] text-[#FAF7F2] text-xs font-medium rounded-full shadow-xs transition-all flex items-center gap-2 group cursor-pointer shrink-0"
+          >
+            <span>View All Products</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+
+        {/* Product Cards: 4 Columns on Desktop, 2 Columns on Mobile matching reference */}
         {filteredProducts.length === 0 ? (
           <div className="py-24 text-center space-y-4">
-            <p className="font-serif text-2xl font-light text-[#1C1917]">
+            <p className="font-serif text-2xl font-light text-[#171513]">
               No pieces found matching your criteria.
             </p>
             <p className="text-xs text-[#78716C] max-w-sm mx-auto">
@@ -212,71 +287,54 @@ export default function App() {
                 setActiveCategory('all');
                 setSearchQuery('');
               }}
-              className="mt-2 px-6 py-2.5 bg-[#1C1917] text-[#FBF9F5] rounded text-xs uppercase tracking-wider font-medium"
+              className="mt-2 px-6 py-2.5 bg-[#171513] text-[#FAF7F2] rounded-full text-xs uppercase tracking-wider font-medium cursor-pointer"
             >
               Reset Filters
             </button>
           </div>
         ) : (
-          <div className="mt-4 sm:mt-8">
-            {/* Mobile horizontal swipe indicator */}
-            <div className="flex sm:hidden items-center justify-between text-[11px] text-[#78716C] mb-2 px-1">
-              <span className="flex items-center gap-1.5 text-[#C5A880] font-medium uppercase tracking-wider text-[10px]">
-                <Sparkles className="w-3 h-3 text-[#C5A880]" />
-                <span>Swipe pieces horizontally</span>
-              </span>
-              <span className="text-[10px] text-stone-400 font-mono">
-                {filteredProducts.length} pieces • Slide →
-              </span>
-            </div>
-
-            {/* Horizontal Swipe Carousel on Mobile, Responsive Grid on Desktop */}
-            <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 sm:pb-0 scrollbar-none sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-8 -mx-4 px-4 sm:mx-0 sm:px-0">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="shrink-0 w-[275px] xs:w-[295px] snap-center sm:w-auto"
-                >
-                  <ProductCard
-                    product={product}
-                    isWishlisted={isProductWishlisted(product.id)}
-                    onToggleWishlist={handleToggleWishlist}
-                    onQuickView={setSelectedProduct}
-                    onAddToCart={(prod, size, col) => handleAddToCart(prod, size, col, 1)}
-                  />
-                </div>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+            {filteredProducts.map((product, idx) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={idx}
+                isWishlisted={isProductWishlisted(product.id)}
+                onToggleWishlist={handleToggleWishlist}
+                onQuickView={setSelectedProduct}
+                onAddToCart={(prod, size, col) => handleAddToCart(prod, size, col, 1)}
+              />
+            ))}
           </div>
         )}
+
       </main>
 
-      {/* 8. Trust & Atelier Perks */}
+      {/* 6. HORIZONTAL 4-PILLAR VALUE / TRUST STRIP matching reference */}
       <TrustSection />
 
-      {/* 9. Seen on Instagram Showcase */}
+      {/* 7. BOTTOM "SHOP WITH CONFIDENCE" WHATSAPP BANNER matching reference */}
+      <ShopWithConfidenceBanner />
+
+      {/* 8. PHYSICAL BOUTIQUE BRANCHES SECTION WITH ICONS */}
+      <LocationsSection />
+
+      {/* 10. INSTAGRAM SHOWCASE */}
       <InstagramGrid />
 
-      {/* 10. Footer */}
+      {/* 11. FOOTER */}
       <Footer />
 
-      {/* Floating Fast Chat Button (Bottom Right) */}
-      <div className="fixed bottom-5 right-4 z-50 flex flex-col gap-2.5 items-end">
-        <a
-          href={`https://wa.me/${STORE_CONTACTS.whatsappNumber}?text=${encodeURIComponent(
-            'Hello Golden Atelier! I am visiting your web store and would like to ask a question regarding size, availability, or custom ordering.'
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex items-center gap-2 px-3.5 sm:px-4 py-2.5 sm:py-3 bg-[#1C1917] text-white hover:bg-[#25D366] rounded-full shadow-2xl border border-[#C5A880]/40 transition-all duration-300"
-          aria-label="Direct WhatsApp Concierge"
-        >
-          <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#25D366] group-hover:text-white transition-colors" />
-          <span className="text-[11px] sm:text-xs uppercase tracking-wider font-medium pr-1 hidden sm:inline">
-            Stylist Chat
-          </span>
-        </a>
-      </div>
+      {/* 12. FLOATING RIGHT-SIDE ACTIONS matching reference (Wishlist, Cart with Badge, Scroll Top) */}
+      <FloatingActions
+        cartCount={totalCartCount}
+        wishlistCount={wishlist.length}
+        onOpenCart={() => {
+          setCartCheckoutMode(false);
+          setCartOpen(true);
+        }}
+        onOpenWishlist={() => setWishlistOpen(true)}
+      />
 
       {/* Interactive Modals & Drawers */}
       {/* Product Detail Modal */}
@@ -286,13 +344,18 @@ export default function App() {
         onClose={() => setSelectedProduct(null)}
         onToggleWishlist={handleToggleWishlist}
         onAddToCart={handleAddToCart}
+        onDirectCheckout={handleDirectCheckout}
         onOpenSizeGuide={() => setSizeGuideOpen(true)}
       />
 
-      {/* Slide-Over Bag / Drawer */}
+      {/* Slide-Over Bag / Drawer with WhatsApp Branch Ordering */}
       <CartDrawer
         isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
+        initialCheckoutMode={cartCheckoutMode}
+        onClose={() => {
+          setCartOpen(false);
+          setCartCheckoutMode(false);
+        }}
         cart={cart}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveFromCart}
@@ -317,8 +380,8 @@ export default function App() {
 
       {/* Notification Toast */}
       {toastMessage && (
-        <div className="fixed bottom-6 left-6 z-50 bg-[#1C1917] text-[#FBF9F5] px-4 py-3 rounded border border-[#C5A880]/50 shadow-2xl flex items-center gap-2.5 text-xs tracking-wide animate-fadeIn">
-          <Sparkles className="w-4 h-4 text-[#C5A880] shrink-0" />
+        <div className="fixed bottom-6 left-6 z-50 bg-[#171513] text-[#FAF7F2] px-4 py-3 rounded border border-[#C69A4A]/50 shadow-2xl flex items-center gap-2.5 text-xs tracking-wide animate-fadeIn">
+          <Sparkles className="w-4 h-4 text-[#C69A4A] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}

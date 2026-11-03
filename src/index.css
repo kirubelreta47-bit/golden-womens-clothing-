@@ -1,25 +1,79 @@
 @import "tailwindcss";
 
 @theme {
-  --color-alabaster: #FBF9F5;
-  --color-oatmeal: #F2EFE9;
+  --color-warm-ivory: #FAF7F2;
+  --color-soft-cream: #F5EFE9;
+  --color-champagne-gold: #C69A4A;
+  --color-deep-black: #171513;
+  --color-warm-beige: #D9C1AF;
+  --color-alabaster: #FAF7F2;
+  --color-oatmeal: #F5EFE9;
   --color-sand: #E7E2D8;
-  --color-espresso: #1C1917;
+  --color-espresso: #171513;
   --color-warmstone: #78716C;
-  --color-champagne: #C5A880;
+  --color-champagne: #C69A4A;
   --color-champagne-light: #E2D3BE;
-  --color-champagne-dark: #A18258;
-  --font-serif: "Cormorant Garamond", Georgia, Cambria, serif;
+  --color-champagne-dark: #A17E36;
+  --font-serif: "Playfair Display", "Cormorant Garamond", Georgia, Cambria, serif;
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-script: "Alex Brush", cursive;
 }
 
 @layer base {
   html {
     font-family: var(--font-sans);
     scroll-behavior: smooth;
-    background-color: #FBF9F5;
-    color: #1C1917;
+    background-color: #FAF7F2;
+    color: #171513;
   }
+}
+
+.font-script {
+  font-family: "Alex Brush", cursive;
+}
+
+/* Animations for sliding and scrolling cards */
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(198, 154, 74, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(198, 154, 74, 0);
+  }
+}
+
+.animate-card-slide {
+  animation: cardSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.pulse-gold {
+  animation: pulseGlow 2.5s infinite;
 }
 
 /* Custom delicate luxury scrollbar */
@@ -28,12 +82,17 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F2EFE9;
+  background: #F5EFE9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #C5A880;
+  background: #C69A4A;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #A18258;
+  background: #A17E36;
+}
+
+.scroll-smooth-horizontal {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }

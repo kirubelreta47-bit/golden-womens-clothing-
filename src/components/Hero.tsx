@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowDown } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -7,72 +7,93 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
   return (
-    <section className="relative overflow-hidden min-h-[calc(100svh-3.5rem)] md:min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-b from-[#FBF9F5] via-[#F6F2EA] to-[#FBF9F5] border-b border-[#E7E2D8]">
-      
-      {/* Mobile Full-Bleed Luxury Background (Pure Editorial Image + Soft Scrim) */}
-      <div className="absolute inset-0 md:hidden z-0 overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=1200&q=85"
-          alt="Golden Atelier"
-          className="w-full h-full object-cover object-top filter brightness-[0.55] contrast-[1.05]"
-        />
-        {/* Elegant gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1C1917] via-[#1C1917]/70 to-[#1C1917]/40" />
+    <section
+      id="hero-section"
+      className="relative w-full h-[calc(100svh-64px)] sm:h-[calc(100vh-80px)] min-h-[500px] overflow-hidden bg-gradient-to-r from-[#D5C2B1] via-[#E2D5C8] to-[#EBE2D7] flex items-center"
+    >
+      {/* Subtle Ambient Background Lighting Overlay */}
+      <div className="absolute inset-0 bg-radial-at-c from-transparent via-black/10 to-black/25 pointer-events-none" />
+
+      {/* 1. MOBILE VIEW (< md): Vertical 70/30 Split directly flush against nav */}
+      <div className="md:hidden relative w-full h-full flex flex-col overflow-hidden">
+        {/* Top 70%: Fashion Model Photography flush with nav */}
+        <div className="h-[70%] w-full relative overflow-hidden flex items-center justify-center bg-[#D5C2B1]">
+          <img
+            src="/golden-womens-clothing-hero-photo.png"
+            alt="Golden Women's Clothing Fashion Model"
+            className="w-full h-full object-cover object-[62%_35%] filter brightness-[0.98] contrast-[1.02]"
+          />
+          {/* Subtle bottom gradient feather blending smoothly into text section */}
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#E2D5C8] to-transparent pointer-events-none" />
+        </div>
+
+        {/* Bottom 30%: Right-Side Typography & Button */}
+        <div className="h-[30%] w-full bg-gradient-to-b from-[#E2D5C8] via-[#EAE1D5] to-[#EBE2D7] flex flex-col justify-center items-center text-center px-4 py-2 space-y-1.5 relative z-10">
+          <p className="font-script text-[#C69A4A] text-xl sm:text-2xl font-normal drop-shadow-xs">
+            Step into Elegance
+          </p>
+
+          <h1 className="font-serif text-xl sm:text-2xl text-[#171513] font-semibold tracking-tight leading-tight">
+            Discover Timeless <span className="font-serif font-normal">Fashion</span>
+          </h1>
+
+          <p className="text-[11px] sm:text-xs text-[#78716C] font-light tracking-wide max-w-xs">
+            Trendy. Elegant. Uniquely You.
+          </p>
+
+          <div className="pt-1">
+            <button
+              onClick={onExploreClick}
+              className="px-6 py-2 bg-[#C69A4A] hover:bg-[#b58b3e] active:scale-95 text-white text-[11px] sm:text-xs font-medium rounded-full shadow-md transition-all duration-300 flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Shop the Collection</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Desktop subtle background watermark rings */}
-      <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] rounded-full border border-[#C5A880]/15 pointer-events-none z-0" />
-      <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full border border-[#C5A880]/10 pointer-events-none z-0" />
+      {/* 2. TABLET & DESKTOP VIEW (>= md): 60/40 Split Layout flush against nav */}
+      <div className="hidden md:flex w-full h-full items-center relative z-10">
+        {/* Left 60%: Fashion Model Photography edge-to-edge flush with nav */}
+        <div className="w-[60%] h-full relative overflow-hidden flex items-center justify-center">
+          <img
+            src="/golden-womens-clothing-hero-photo.png"
+            alt="Golden Women's Clothing Fashion Model"
+            className="w-full h-full object-cover object-[60%_35%] lg:object-[62%_32%] filter brightness-[0.98] contrast-[1.02]"
+          />
+          {/* Soft Gradient Mask blending seamlessly into right text area */}
+          <div className="absolute inset-y-0 right-0 w-36 lg:w-56 bg-gradient-to-r from-transparent via-[#E2D5C8]/80 to-[#EBE2D7] pointer-events-none" />
+        </div>
 
-      {/* Content Container - fits to screen */}
-      <div className="w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center">
-          
-          {/* Main Editorial Narrative */}
-          <div className="md:col-span-7 space-y-4 sm:space-y-5 text-center md:text-left">
-            
-            {/* Minimalist Season Tag */}
-            <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-[#C5A880] font-semibold">
-              New Collection 2026 • Addis Ababa
-            </p>
+        {/* Right 40%: Editorial Typography Composition */}
+        <div className="w-[40%] h-full flex flex-col justify-center px-6 lg:px-12 xl:px-16 py-8 space-y-4 lg:space-y-6 text-left">
+          {/* Delicate Script Heading */}
+          <p className="font-script text-[#C69A4A] text-4xl lg:text-5xl xl:text-6xl font-normal tracking-wide drop-shadow-xs">
+            Step into Elegance
+          </p>
 
-            {/* Headline */}
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-[#FBF9F5] md:text-[#1C1917] leading-[1.14]">
-              Dresses & Sets <br />
-              <span className="italic font-normal text-[#C5A880]">Tailored to Turn Heads.</span>
-            </h1>
+          {/* Large Editorial Serif Heading */}
+          <h1 className="font-serif text-4xl lg:text-5xl xl:text-6xl text-white drop-shadow-sm font-semibold tracking-tight leading-[1.12]">
+            Discover Timeless <br />
+            <span className="font-serif text-white font-normal">Fashion</span>
+          </h1>
 
-            {/* Clean, authentic body copy */}
-            <p className="text-xs sm:text-sm md:text-base text-stone-200 md:text-stone-600 max-w-sm md:max-w-lg mx-auto md:mx-0 font-normal leading-relaxed">
-              Silk dresses & matching sets. Direct WhatsApp & Telegram delivery in Addis Ababa.
-            </p>
+          {/* Modern Clean Subtitle */}
+          <p className="text-xs sm:text-sm lg:text-base text-stone-100 font-light tracking-wide max-w-md">
+            Trendy. Elegant. Uniquely You.
+          </p>
 
-            {/* Single Clean Primary Action */}
-            <div className="pt-2 sm:pt-4 flex justify-center md:justify-start">
-              <button
-                onClick={onExploreClick}
-                className="w-full sm:w-auto px-8 py-3.5 bg-[#C5A880] text-[#1C1917] hover:bg-[#b5966d] md:bg-[#1C1917] md:text-[#FBF9F5] md:hover:bg-[#332e2b] transition-all text-xs uppercase tracking-[0.2em] font-medium shadow-md flex items-center justify-center gap-2 group cursor-pointer"
-              >
-                <span>Shop the Collection</span>
-                <ArrowDown className="w-3.5 h-3.5 text-[#1C1917] md:text-[#C5A880] group-hover:translate-y-0.5 transition-transform" />
-              </button>
-            </div>
-
+          {/* Primary Champagne Gold Button */}
+          <div className="pt-2 sm:pt-4">
+            <button
+              onClick={onExploreClick}
+              className="px-8 sm:px-9 py-3.5 sm:py-4 bg-[#C69A4A] hover:bg-[#b58b3e] active:scale-95 text-white text-xs sm:text-sm font-medium rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2.5 group cursor-pointer"
+            >
+              <span>Shop the Collection</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
-
-          {/* Right Column: Desktop Pure Editorial Photography (No ad badges/overlays) */}
-          <div className="hidden md:flex md:col-span-5 justify-center">
-            <div className="relative w-full max-w-sm lg:max-w-md">
-              <div className="relative aspect-[3/4] rounded-sm overflow-hidden shadow-2xl border border-[#E7E2D8] bg-[#F2EFE9]">
-                <img
-                  src="https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=1000&q=85"
-                  alt="Golden Women's Clothing Store Lookbook"
-                  className="w-full h-full object-cover object-top filter brightness-[0.98] contrast-[1.02]"
-                />
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </section>

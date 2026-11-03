@@ -40,3 +40,19 @@ export interface CartItem {
   selectedColor: ProductColor;
   quantity: number;
 }
+
+export interface CustomerOrderInfo {
+  name: string;
+  phone: string;
+  branch: string;
+  orderType: 'Store Pickup' | 'Delivery';
+  deliveryAddress: string;
+  additionalInstructions: string;
+}
+
+export interface OrderFormErrors {
+  name?: string;
+  phone?: string;
+  branch?: string;
+  deliveryAddress?: string;
+}

@@ -1,9 +1,10 @@
-import { CartItem, Product, ProductColor } from '../types/store';
+import { CartItem, CustomerOrderInfo, Product, ProductColor } from '../types/store';
+import { WHATSAPP_PHONE_NUMBER, WHATSAPP_PHONE_DISPLAY, createWhatsAppChatUrl } from '../config/whatsapp';
 
 // Default atelier store contacts
 export const STORE_CONTACTS = {
-  phoneDisplay: '+251 91 123 4567',
-  whatsappNumber: '251911234567', // International format without leading '+'
+  phoneDisplay: WHATSAPP_PHONE_DISPLAY,
+  whatsappNumber: WHATSAPP_PHONE_NUMBER,
   telegramHandle: 'GoldenWomensStore',
   instagramHandle: 'golden_womens_clothing_store',
   atelierLocation: 'Bole Medhanialem, Edna Mall Area, Addis Ababa',
@@ -18,7 +19,68 @@ export function formatPrice(amountETB: number): string {
 }
 
 /**
- * Builds pre-formatted message for a single product direct checkout
+ * Builds the official WhatsApp formatted message for an entire order.
+ * Strictly adheres to the store order template.
+ */
+export function buildWhatsAppOrderMessage(
+  cart: CartItem[],
+  customerInfo: CustomerOrderInfo
+): string {
+  if (cart.length === 0) return '';
+
+  const totalETB = cart.reduce((sum, item) => sum + item.product.priceETB * item.quantity, 0);
+
+  const orderItemsFormatted = cart
+    .map((item, idx) => {
+      const itemTotal = formatPrice(item.product.priceETB * item.quantity);
+      return [
+        `${idx + 1}. ${item.product.name}`,
+        `Size: ${item.selectedSize}`,
+        `Color: ${item.selectedColor.name}`,
+        `Quantity: ${item.quantity}`,
+        `Price: ${itemTotal}`,
+      ].join('\n');
+    })
+    .join('\n\n');
+
+  const lines: string[] = [
+    `Hello Golden Women's Clothing! I'd like to place an order.`,
+    ``,
+    `CUSTOMER DETAILS`,
+    `Name: ${customerInfo.name.trim()}`,
+    `Phone: ${customerInfo.phone.trim()}`,
+    ``,
+    `ORDER DETAILS`,
+    ``,
+    orderItemsFormatted,
+    ``,
+    `TOTAL: ${formatPrice(totalETB)}`,
+    ``,
+    `PREFERRED BRANCH:`,
+    `${customerInfo.branch}`,
+    ``,
+    `ORDER TYPE:`,
+    `${customerInfo.orderType}`,
+  ];
+
+  if (customerInfo.orderType === 'Delivery' && customerInfo.deliveryAddress.trim()) {
+    lines.push(`Delivery Address: ${customerInfo.deliveryAddress.trim()}`);
+  }
+
+  if (customerInfo.additionalInstructions.trim()) {
+    lines.push(`Additional Instructions: ${customerInfo.additionalInstructions.trim()}`);
+  }
+
+  lines.push(
+    ``,
+    `Please confirm product availability and help me complete my order.`
+  );
+
+  return lines.join('\n');
+}
+
+/**
+ * Builds pre-formatted message for a single product direct inquiry
  */
 export function buildSingleProductMessage(
   product: Product,
@@ -27,23 +89,23 @@ export function buildSingleProductMessage(
   quantity: number = 1
 ): string {
   const priceStr = formatPrice(product.priceETB * quantity);
-  
+
   return [
-    `✨ *New Order from Golden Boutique Storefront* ✨`,
+    `Hello Golden Women's Clothing! I'd like to ask about this piece:`,
     ``,
-    `• Item: ${product.name}`,
+    `• Product: ${product.name}`,
     `• Size: ${size}`,
     `• Color: ${color.name}`,
     `• Quantity: ${quantity}`,
     `• Price: ${priceStr}`,
     `• Item ID: #${product.id}`,
     ``,
-    `Hello! I would like to confirm availability and arrange delivery/pickup for this piece.`,
+    `Please confirm product availability and help me complete my order.`,
   ].join('\n');
 }
 
 /**
- * Builds pre-formatted message for an entire cart / bag
+ * Builds pre-formatted message for an entire cart / bag (legacy helper retained for compatibility)
  */
 export function buildCartOrderMessage(
   cart: CartItem[],
@@ -52,32 +114,29 @@ export function buildCartOrderMessage(
   if (cart.length === 0) return '';
 
   const totalETB = cart.reduce((sum, item) => sum + item.product.priceETB * item.quantity, 0);
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const totalFormatted = formatPrice(totalETB);
 
   const itemLines = cart.map((item, index) => {
     const itemPrice = formatPrice(item.product.priceETB * item.quantity);
-    return `${index + 1}. ${item.product.name}\n   - Size: ${item.selectedSize} | Color: ${item.selectedColor.name}\n   - Qty: ${item.quantity} | Total: ${itemPrice} (ID: #${item.product.id})`;
+    return `${index + 1}. ${item.product.name}\nSize: ${item.selectedSize}\nColor: ${item.selectedColor.name}\nQuantity: ${item.quantity}\nPrice: ${itemPrice}`;
   });
 
   const lines = [
-    `✨ *Order Inquiry from Golden Boutique Storefront* ✨`,
+    `Hello Golden Women's Clothing! I'd like to place an order.`,
     ``,
-    `*Selected Atelier Pieces (${totalItems} items):*`,
+    `ORDER DETAILS`,
+    ``,
     ...itemLines,
     ``,
-    `*Summary:*`,
-    `• Total Pieces: ${totalItems}`,
-    `• Estimated Total: ${totalFormatted}`,
+    `TOTAL: ${formatPrice(totalETB)}`,
   ];
 
   if (deliveryNote.trim()) {
-    lines.push(`• Delivery / Sizing Note: ${deliveryNote.trim()}`);
+    lines.push(`Delivery Notes: ${deliveryNote.trim()}`);
   }
 
   lines.push(
     ``,
-    `Hello! I would like to place this order, confirm availability, and coordinate delivery/pickup with your atelier.`
+    `Please confirm product availability and help me complete my order.`
   );
 
   return lines.join('\n');
@@ -87,7 +146,7 @@ export function buildCartOrderMessage(
  * Generates WhatsApp click-to-chat URL
  */
 export function getWhatsAppUrl(encodedText: string): string {
-  return `https://wa.me/${STORE_CONTACTS.whatsappNumber}?text=${encodeURIComponent(encodedText)}`;
+  return createWhatsAppChatUrl(encodedText);
 }
 
 /**

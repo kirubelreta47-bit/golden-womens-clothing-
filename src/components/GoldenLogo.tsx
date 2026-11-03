@@ -13,7 +13,7 @@ export const GoldenLogo: React.FC<GoldenLogoProps> = ({
 }) => {
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
-      {/* Medallion SVG */}
+      {/* Official Medallion Logo SVG */}
       <svg
         width={size}
         height={size}
@@ -142,13 +142,13 @@ export const GoldenLogo: React.FC<GoldenLogoProps> = ({
         </text>
       </svg>
 
-      {/* Optional Side Text Label */}
+      {/* Side Typography */}
       {showText && (
         <div className="flex flex-col text-left leading-none">
-          <span className="font-serif text-lg sm:text-xl font-normal tracking-[0.2em] text-[#1C1917]">
+          <span className="font-serif text-lg sm:text-xl font-bold tracking-[0.16em] text-[#171513]">
             GOLDEN
           </span>
-          <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.25em] text-[#C5A880] font-sans font-medium mt-0.5">
+          <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.24em] text-[#C69A4A] font-sans font-medium mt-1">
             Wear Golden, Be Confident
           </span>
         </div>
